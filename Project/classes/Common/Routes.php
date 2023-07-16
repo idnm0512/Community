@@ -2,5 +2,6 @@
     namespace Common;
 
     interface Routes {
-        public function getRoutes();
+        public function getRoutes(): Array;
+        public function getAuthentication(): Authentication;
     }

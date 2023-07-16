@@ -58,7 +58,7 @@
             if ($valid == true) {
                 $user['password'] = password_hash($user['password'], PASSWORD_DEFAULT);
 
-                $this -> userTable -> insert($user);
+                $this -> userTable -> save($user);
 
                 header('location: /user/join/success');
             } else {

@@ -7,22 +7,26 @@
     use Community\Controllers\Home;
     use Community\Controllers\Join;
     use Community\Controllers\Login;
+    use Community\Controllers\Board;
 
     class CommunityRoutes implements Routes {
         private $userTable;
+        private $boardTable;
         private $authentication;
         
         public function __construct() {
             include __DIR__ . '/../../includes/DatabaseConnection.php';
 
-            $this -> userTable = new DatabaseTable($pdo, 'user', 'id', 'Community\Entity\User', [&$this -> userTable]);
+            $this -> userTable = new DatabaseTable($pdo, 'user', 'id', 'Community\Entity\User', [&$this -> boardTable]);
+            $this -> boardTable = new DatabaseTable($pdo, 'board', 'id', 'Community\Entity\Board', [&$this -> userTable]);
             $this -> authentication = new Authentication($this -> userTable, 'email', 'password');
         }
 
-        public function getRoutes() {
+        public function getRoutes(): Array {
             $homeController = new Home();
             $joinController = new Join($this -> userTable);
             $loginController = new Login($this -> authentication);
+            $boardController = new Board($this -> boardTable, $this -> authentication);
 
             $routes = [
                 '' => [
@@ -63,14 +67,48 @@
                         'action' => 'loginSuccessForm'
                     ]
                 ],
+                'user/login/error' => [
+                    'GET' => [
+                        'controller' => $loginController,
+                        'action' => 'loginError'
+                    ]
+                ],
                 'user/logout' => [
                     'GET' => [
                         'controller' => $loginController,
                         'action' => 'logout'
                     ]
+                ],
+                'board/list' => [
+                    'GET' => [
+                        'controller' => $boardController,
+                        'action' => 'boardList'
+                    ]
+                ],
+                'board/edit' => [
+                    'GET' => [
+                        'controller' => $boardController,
+                        'action' => 'boardEditForm'
+                    ],
+                    'POST' => [
+                        'controller' => $boardController,
+                        'action' => 'saveBoard'
+                    ],
+                    'login' => true
+                ],
+                'board/delete' => [
+                    'POST' => [
+                        'controller' => $boardController,
+                        'action' => 'deleteBoard'
+                    ],
+                    'login' => true
                 ]
             ];
 
             return $routes;
+        }
+
+        public function getAuthentication(): Authentication {
+            return $this -> authentication;
         }
     }

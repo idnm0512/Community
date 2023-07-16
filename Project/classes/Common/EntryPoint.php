@@ -35,20 +35,26 @@
         public function run() {
             $routes = $this -> routes -> getRoutes();
 
-            $controller = $routes[$this -> route][$this -> method]['controller'];
-            $action = $routes[$this -> route][$this -> method]['action'];
+            $authentication = $this -> routes -> getAuthentication();
 
-            $page = $controller -> $action();
-
-            if (isset($page['variables'])) {
-                $output = $this -> loadTemplate($page['template'], $page['variables']);
+            if (isset($routes[$this -> route]['login']) && $routes[$this -> route]['login'] && !$authentication -> loginCheck()) {
+                header('location: /user/login/error');
             } else {
-                $output = $this -> loadTemplate($page['template']);
+                $controller = $routes[$this -> route][$this -> method]['controller'];
+                $action = $routes[$this -> route][$this -> method]['action'];
+    
+                $page = $controller -> $action();
+    
+                if (isset($page['variables'])) {
+                    $output = $this -> loadTemplate($page['template'], $page['variables']);
+                } else {
+                    $output = $this -> loadTemplate($page['template']);
+                }
+    
+                echo $this -> loadTemplate('layout.html.php', [
+                    'title' => $page['title'],
+                    'output' => $output
+                ]);
             }
-
-            echo $this -> loadTemplate('layout.html.php', [
-                'title' => $page['title'],
-                'output' => $output
-            ]);
         }
     }

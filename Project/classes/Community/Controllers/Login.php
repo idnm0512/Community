@@ -40,6 +40,13 @@
             }
         }
 
+        public function loginError() {
+            return [
+                'template' => 'loginError.html.php',
+                'title' => 'LOGIN ERROR'
+            ];
+        }
+
         public function logout() {
             session_unset();
 
