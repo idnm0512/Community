@@ -8,17 +8,21 @@
     use Community\Controllers\Join;
     use Community\Controllers\Login;
     use Community\Controllers\Board;
+    use Community\Controllers\Comment;
 
     class CommunityRoutes implements Routes {
         private $userTable;
         private $boardTable;
+        private $commentTable;
         private $authentication;
         
         public function __construct() {
             include __DIR__ . '/../../includes/DatabaseConnection.php';
 
-            $this -> userTable = new DatabaseTable($pdo, 'user', 'id', 'Community\Entity\User', [&$this -> boardTable]);
+            $this -> userTable = new DatabaseTable($pdo, 'user', 'id', 'Community\Entity\User', [&$this -> boardTable,
+                                                                                                 &$this -> commentTable]);
             $this -> boardTable = new DatabaseTable($pdo, 'board', 'id', 'Community\Entity\Board', [&$this -> userTable]);
+            $this -> commentTable = new DatabaseTable($pdo, 'comment', 'id', 'Community\Entity\Comment', [&$this -> userTable]);
             $this -> authentication = new Authentication($this -> userTable, 'email', 'password');
         }
 
@@ -26,7 +30,8 @@
             $homeController = new Home();
             $joinController = new Join($this -> userTable);
             $loginController = new Login($this -> authentication);
-            $boardController = new Board($this -> boardTable, $this -> authentication);
+            $boardController = new Board($this -> boardTable, $this -> commentTable, $this -> authentication);
+            $commentController = new Comment($this -> commentTable, $this -> authentication);
 
             $routes = [
                 '' => [
@@ -102,6 +107,16 @@
                         'action' => 'deleteBoard'
                     ],
                     'login' => true
+                ],
+                'comment/edit' => [
+                    'POST' => [
+                        'controller' => $commentController,
+                        'action' => 'saveComment'
+                    ],
+                    'GET' => [
+                        'controller' => $commentController,
+                        'action' => 'commentEditForm'
+                    ]
                 ]
             ];
 

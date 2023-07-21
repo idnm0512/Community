@@ -5,11 +5,13 @@ use Common\Authentication;
 use Common\DatabaseTable;
 
     class Board {
+        public $commentTable;
         private $boardTable;
         private $authentication;
 
-        public function __construct(DatabaseTable $boardTable, Authentication $authentication) {
+        public function __construct(DatabaseTable $boardTable, DatabaseTable $commentTable, Authentication $authentication) {
             $this -> boardTable = $boardTable;
+            $this -> commentTable = $commentTable;
             $this -> authentication = $authentication;
         }
 
@@ -20,13 +22,16 @@ use Common\DatabaseTable;
 
             $user = $this -> authentication -> getUser();
 
+            $comments = $this -> commentTable -> findAll();
+
             return [
                 'template' => 'boardList.html.php',
                 'title' => 'BOARD LIST',
                 'variables' => [
                     'totalBoard' => $totalBoard,
                     'boards' => $boards,
-                    'user' => $user
+                    'user' => $user,
+                    'comments' => $comments
                 ]
             ];
         }
